@@ -11,10 +11,17 @@ for script in /etc/profile.d/*.sh ; do
 done
 source /etc/samba/functions.sh
 if [ -f "/etc/samba/firstrun" ]; then
+  mkdir -p /etc/samba/conf.d/
+  if [ -z "$sharename" ]
+  then
     echo 'Hello. You are installing samba server'
     useradd
     rm /etc/samba/firstrun
     shareadd
+  else
+    fastinstall
+  fi
+
 fi
 
 ps=$(ps)

@@ -1,5 +1,24 @@
+set -x
+function fastinstall() {
+  passato=yes
+  username=${username:-root}
+  usernameforfastinstall=$username
+  useradd
+  username=$usernameforfastinstall
+  sharename=${sharename:-root}
+  sharecomment=${sharecomment:-root directory}
+  sharepath=${sharepath:-/share/root}
+  shareadd
+  unset username
+  unset passato
+}
+
 function useradd() {
 
+  username=${username:-$1}
+  password=${password:-$2}
+  unset params[1]
+  unset params[2]
   #Checking the username is true ?
   while [[ ! $username =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]+$|^[a-zA-Z0-9_.+-]+$ ]];
   do
@@ -18,20 +37,24 @@ function useradd() {
     fi
   done
 
-  passrandom=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-8}`
-  if [ ! -z "$passato" ]
-  then
-    password="$passrandom"
-    echo "Your password is $password"
-  fi
+  passrandom=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8`
+
   if [ ! -z "$password" ]
   then
     password1="$password"
     password2="$password"
+  else
+    if [ ! -z "$passato" ]
+    then
+      password="$passrandom"
+      echo "Your password is $password"
+      password1="$password"
+      password2="$password"
+    fi
   fi
 
   passpattern="^[0-9A-z#$%^&*()\-_+={}[\]|\:;\"'<>,.?]{8,}$"
-  while [[ ! "$password1" == "$password2" ]] || [ -z "$password1" ];
+  while [[ ! "$password1" == "$password2" ]] || [ -z "$password1" ] || [[ ! $password1 =~ $passpattern ]];
   do
       #Checking the pattern of password
       while [[ ! $password1 =~ $passpattern ]];
@@ -72,14 +95,17 @@ function useradd() {
 $password2" | smbpasswd -a $username
 
   usernameforshare=$username
-  password1=''
-  password2=''
-  username=''
+  unset password1
+  unset password2
+  unset username
+  unset password
   [ ! -f "/etc/samba/firstrun" ] && reload-samba
 
 }
 
 function shareadd() {
+
+    #To getting Share Name From User
     while [[ ! $sharename =~ ^[a-zA-Z0-9._+-]+$ ]];
     do
       #if the username setted by the envoriment bypass to read username
@@ -103,6 +129,7 @@ function shareadd() {
       fi
     done
 
+    #To getting Share Comment From User
     while [[ ! $sharecomment =~ (^[ a-zA-Z0-9\.\-_]+)$ ]];
     do
       #if the username setted by the envoriment bypass to read username
@@ -119,6 +146,7 @@ function shareadd() {
       fi
     done
 
+    #To getting Share Path From User
     while [[ ! $sharepath =~ (^[/a-zA-Z0-9._+-]+)$ ]];
     do
       #if the username setted by the envoriment bypass to read username
@@ -135,13 +163,19 @@ function shareadd() {
       fi
     done
 
+    #To getting UserName From User for allowed users
     while [[ ! $username =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]+$|^[a-zA-Z0-9_.+-]+$ ]];
     do
 
       #if the username setted by the envoriment bypass to read username
-      if [ -z "$username" ]
+      if [ -z "$usernameforshare" ]
       then
-        read -p 'Valid users for $sharename » ' -e  -i $usernameforshare username
+        read -p "Valid users for $sharename » " username
+      else
+        if [ -z "$username" ]
+        then
+          read -p "Valid users for $sharename » " -e  -i $usernameforshare username
+        fi
       fi
 
       #Checking the username pattern
@@ -153,8 +187,8 @@ function shareadd() {
     done
 
 
-    #Updating samba
-    if [[ $sharename =~ ^[a-zA-Z0-9._+-]+$ ]] && [ -z "$sharename" ] && [ -z "$username" ] && [ -z "$sharecomment" ];
+    #Writing share configration
+    if [[ $sharename =~ ^[a-zA-Z0-9._+-]+$ ]] && [ ! -z "$sharename" ] && [ ! -z "$username" ] && [ ! -z "$sharecomment" ];
     then
       echo "[$sharename]
               comment = $sharecomment
@@ -168,8 +202,15 @@ function shareadd() {
               directory mask = 0750
               guest ok = no" > /etc/samba/conf.d/$sharename.conf
       update-samba
+    else
+      echo "Error. Your configration file cannot saved"
     fi
 
+    unset sharename
+    unset sharecomment
+    unset sharepath
+    unset username
+    unset usernameforshare
 }
 
 
@@ -185,10 +226,15 @@ function sharedel() {
     else
       echo "$sharename is not exist in config location"
     fi
-
-
 }
 
+function sharelist() {
+  ls -1 /etc/samba/conf.d/ | sed -e 's/\.conf$//'
+}
+
+function shareshow() {
+  cat /etc/samba/conf.d/$1
+}
 
 function update-samba() {
   echo "Re generating config file"
