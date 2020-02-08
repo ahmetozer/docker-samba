@@ -1,8 +1,0 @@
-#!/bin/sh
-source /etc/samba/functions
-if [ -f "/etc/samba/firstrun" ]; then
-    echo 'Hello You are installing samba server'
-    echo 'Fistly you have to add user'
-    useradd()
-    rm /etc/samba/firstrun
-fi
