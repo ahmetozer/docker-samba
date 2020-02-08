@@ -1,4 +1,4 @@
-set -x
+
 function fastinstall() {
   passato=yes
   username=${username:-root}
