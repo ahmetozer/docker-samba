@@ -19,7 +19,7 @@ docker build -t samba .
 It is easy to use and configure with automated script.
 
 ```bash
-docker run --it samba
+docker run --it ahmetozer/samba
  ```
 
 ## Share Folders With Samba Container
@@ -28,7 +28,7 @@ If you want to share outside of folder you can use -v argumant while creating do
 For example your website files at /var/www directory and you want to share your web folder with samba.
 
 ```bash
-server:~# docker run -it -v/var/www:/share/web samba
+server:~# docker run -it -v/var/www:/share/web ahmetozer/samba
 Hello. You are installing samba server
 username » root
 Please enter password (at least 8 character) random password 1dM3ltN6 »
@@ -180,7 +180,7 @@ reload-samba
 This script also has a fast install option. Set sharename variable to use fast install option.
 
 ```bash
-server:/#docker run -v/var/www:/share/web -e sharename=web -it samba
+server:/#docker run -v/var/www:/share/web -e sharename=web -it ahmetozer/samba
 Your password is c3b-NbmV
 New SMB password:
 Retype new SMB password:
@@ -191,7 +191,7 @@ Reloading samba service
 If you don't want to use random password, set the password variable.
 
 ```bash
-server:/#docker run -it -v/var/www:/share/web -e sharename=web -e password=1234578 samba
+server:/#docker run -it -v/var/www:/share/web -e sharename=web -e password=1234578 ahmetozer/samba
 New SMB password:
 Retype new SMB password:
 Added user root.
@@ -202,7 +202,7 @@ Reloading samba service
 OR you can set passato to no and script will be ask password in terminal
 
 ```bash
-server:/#docker run --rm -it -e sharename=web -e passato=no samba
+server:/#docker run --rm -it -e sharename=web -e passato=no ahmetozer/samba
 Please enter password (at least 8 character) random password 8jUPPDVb »
 Please retype password »
 New SMB password:
