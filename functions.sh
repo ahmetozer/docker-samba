@@ -1,6 +1,6 @@
 
 function fastinstall() {
-  passato=yes
+  passato=${passato:-yes}
   username=${username:-root}
   usernameforfastinstall=$username
   useradd
@@ -44,7 +44,7 @@ function useradd() {
     password1="$password"
     password2="$password"
   else
-    if [ ! -z "$passato" ]
+    if [ "$passato" == "yes" ]
     then
       password="$passrandom"
       echo "Your password is $password"
@@ -91,6 +91,7 @@ function useradd() {
   done
 
   #Adding new samba user
+  adduser --disabled-password $username > /dev/null 2>&1
   echo "$password1
 $password2" | smbpasswd -a $username
 
@@ -105,6 +106,13 @@ $password2" | smbpasswd -a $username
 
 function shareadd() {
 
+    if [ ! -z $1 ]
+    then
+      sharename=${sharename:-$1}
+      sharepath=${sharepath:-$2}
+      username=${username:-$3}
+      sharecomment=${sharecomment:-$4}
+    fi
     #To getting Share Name From User
     while [[ ! $sharename =~ ^[a-zA-Z0-9._+-]+$ ]];
     do
@@ -190,6 +198,11 @@ function shareadd() {
     #Writing share configration
     if [[ $sharename =~ ^[a-zA-Z0-9._+-]+$ ]] && [ ! -z "$sharename" ] && [ ! -z "$username" ] && [ ! -z "$sharecomment" ];
     then
+      mkdir -p $sharepath
+      echo "Share name » $sharename
+share dir » $sharepath
+share comment » $sharecomment
+share valid users » $username"
       echo "[$sharename]
               comment = $sharecomment
               path = $sharepath
@@ -216,12 +229,12 @@ function shareadd() {
 
 
 function sharedel() {
-
+    sharename=${sharename:-$1}
     #Checking file is exist end does not have a dangerous character like a "*"
     if [ -f "/etc/samba/conf.d/$sharename.conf" ] && [[ $sharename =~ ^[a-zA-Z0-9._+-]+$ ]] ;
     then
-      echo "Deleting file /etc/samba/conf.d/$sharefile.conf"
-      rm /etc/samba/conf.d/$sharefile.conf
+      echo "Deleting file /etc/samba/conf.d/$sharename.conf"
+      rm /etc/samba/conf.d/$sharename.conf
       update-samba
     else
       echo "$sharename is not exist in config location"
@@ -233,7 +246,12 @@ function sharelist() {
 }
 
 function shareshow() {
-  cat /etc/samba/conf.d/$1
+  if [ -f "/etc/samba/conf.d/$1.conf" ] && [[ $1 =~ ^[a-zA-Z0-9._+-]+$ ]] ;
+  then
+    cat /etc/samba/conf.d/$1.conf
+  else
+    echo "This config not exist"
+  fi
 }
 
 function update-samba() {
