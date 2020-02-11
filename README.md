@@ -22,6 +22,22 @@ It is easy to use and configure with automated script.
 docker run --it ahmetozer/samba
  ```
 
+## Accessing container network
+There is a few option at this point.
+First one is 1 docker container and share with docker-proxy with -p argumant.
+
+```bash
+docker run --it ahmetozer/samba -p 445:445
+```
+
+Second one is without port share. Each docker container has a own static IP address and it is accessible only local network.
+```bash
+docker run --it ahmetozer/samba --ip 172.17.0.80
+```
+
+Third one is again without port share but also accessible remote network via vpn.
+		VPN script is preparing.
+
 ## Share Folders With Samba Container
 If you want to share outside of folder you can use -v argumant while creating docker.
 -v has a ":" to bind local and container folder. Before the ":" it's your server directory, after the ":" it's your container directory
