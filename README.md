@@ -19,7 +19,7 @@ docker build -t samba .
 It is easy to use and configure with automated script.
 
 ```bash
-docker run --it ahmetozer/samba
+docker run -it ahmetozer/samba
  ```
 
 ## Accessing container network
@@ -27,12 +27,12 @@ There is a few option at this point.
 First one is 1 docker container and share with docker-proxy with -p argumant.
 
 ```bash
-docker run --it ahmetozer/samba -p 445:445
+docker run -it ahmetozer/samba -p 445:445
 ```
 
 Second one is without port share. Each docker container has a own static IP address and it is accessible only local network.
 ```bash
-docker run --it ahmetozer/samba --ip 172.17.0.80
+docker run -it ahmetozer/samba --ip 172.17.0.80
 ```
 
 Third one is again without port share but also accessible remote network via vpn.
